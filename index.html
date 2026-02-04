@@ -18,6 +18,7 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* 英雄榜修正 */
         .hero-banner { background: linear-gradient(135deg, var(--bni-red), var(--bni-dark-red)); border-radius: 15px; padding: 20px; text-align: center; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.2); margin-top: 20px; }
         .top3-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 160px; margin-top: 10px; }
         .rank-card { background: white; color: var(--text-dark); padding: 10px; border-radius: 12px; width: 95px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; }
@@ -33,6 +34,7 @@
         .bar-fill { height: 100%; background: var(--pure-black) !important; transition: width 1s; }
         .bar-num { width: 45px; font-size: 13px; text-align: right; font-weight: 700; color: var(--pure-black); }
 
+        /* 積分選單 */
         .group-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; }
         .filter-btn { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 14px; }
         .filter-btn.active { background: var(--bni-red); color: white; border-color: var(--bni-red); }
@@ -43,17 +45,36 @@
         .task-btn { background: var(--bni-red); border: none; border-radius: 12px; padding: 20px 10px; color: white; cursor: pointer; text-align: center; }
         .task-btn span { color: var(--gold); font-size: 18px; font-weight: 900; display: block; }
 
+        /* 後台分配樣式 */
         .unassigned-pool { border: 2px dashed #ccc; padding: 10px; border-radius: 10px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; }
         .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; margin-bottom: 10px; position: relative;}
         .tag { padding: 6px 12px; background: white; border: 1px solid #eee; border-radius: 5px; font-size: 14px; cursor: pointer; }
         .tag.active { background: var(--gold); color: white; border-color: var(--gold); }
         .in-group-tag { padding: 4px 8px; background: #eee; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
 
+        /* 彈窗樣式 */
         #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; }
         .confirm-box { background: white; width:90%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
-        .btn-add { background: var(--bni-red); color: white; font-weight: bold; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        /* 修正後的按鈕樣式，確保文字清晰 */
+        .btn-add { 
+            background: var(--bni-red); 
+            color: white !important; 
+            font-weight: bold; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 8px; 
+            width: 100%; 
+            cursor: pointer; 
+            display: block; 
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        .btn-add:active { transform: translateY(2px); box-shadow: none; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bni-red); color: white; padding: 10px 25px; border-radius: 30px; display: none; z-index: 5000; }
     </style>
 </head>
@@ -63,22 +84,22 @@
 
     <div id="loginOverlay">
         <div class="confirm-box">
-            <div style="background:var(--bni-red); color:white; padding:15px;">🔒 幹部登入</div>
+            <div style="background:var(--bni-red); color:white; padding:15px; font-weight:bold;">🔒 幹部登入</div>
             <div style="padding:20px;"><input type="password" id="adminPwd" placeholder="管理密碼" style="text-align:center;"></div>
             <div style="display:flex; border-top:1px solid #eee;">
-                <button style="flex:1; padding:15px; border:none; background:none;" onclick="closeLogin()">取消</button>
-                <button style="flex:1; padding:15px; border:none; background:none; color:var(--bni-red); font-weight:bold;" onclick="checkLogin()">登入</button>
+                <button style="flex:1; padding:15px; border:none; background:none; cursor:pointer;" onclick="closeLogin()">取消</button>
+                <button style="flex:1; padding:15px; border:none; background:none; color:var(--bni-red); font-weight:bold; cursor:pointer;" onclick="checkLogin()">登入</button>
             </div>
         </div>
     </div>
 
     <div id="confirmOverlay">
         <div class="confirm-box">
-            <div style="background:var(--bni-red); color:white; padding:15px;">⚠️ 請確認錄入</div>
+            <div style="background:var(--bni-red); color:white; padding:15px; font-weight:bold;">⚠️ 請確認錄入</div>
             <div id="confirmText" style="padding:25px; font-size:18px;"></div>
             <div style="display:flex; border-top:1px solid #eee;">
-                <button style="flex:1; padding:15px; border:none; background:none;" onclick="closeConfirm()">取消</button>
-                <button style="flex:1; padding:15px; border:none; background:none; color:var(--bni-red); font-weight:bold;" id="finalSubmitBtn">確定</button>
+                <button style="flex:1; padding:15px; border:none; background:none; cursor:pointer;" onclick="closeConfirm()">取消</button>
+                <button style="flex:1; padding:15px; border:none; background:none; color:var(--bni-red); font-weight:bold; cursor:pointer;" id="finalSubmitBtn">確定送出</button>
             </div>
         </div>
     </div>
@@ -105,10 +126,10 @@
     <div id="sec3" class="section">
         <h2>⚙️ 賽期與數據管理</h2>
         <div class="glass-card">
-            <button class="btn-add" style="background:#444; margin-bottom:10px;" onclick="exportCSV()">📥 匯出 CSV</button>
+            <button class="btn-add" style="background:#444;" onclick="exportCSV()">📥 匯出積分報表 (CSV)</button>
             <div style="display:flex; gap:10px;"><input type="date" id="seasonStart"><input type="date" id="seasonEnd"></div>
-            <button class="btn-add" style="background:var(--gold);" onclick="updateSeason()">儲存賽期</button>
-            <button class="btn-add" style="background:var(--bni-red); margin-top:10px;" onclick="resetScores()">🧹 積分歸零</button>
+            <button class="btn-add" style="background:var(--gold);" onclick="updateSeason()">💾 儲存賽期設定</button>
+            <button class="btn-add" style="background:var(--bni-red);" onclick="resetScores()">🧹 賽事結算：積分歸零</button>
         </div>
 
         <h2>👥 快速分配組別 (點人再點組)</h2>
@@ -116,7 +137,7 @@
             <b>1. 未分配人員 (點選姓名)</b>
             <div class="unassigned-pool" id="poolList"></div>
             <input type="text" id="newMemName" placeholder="新會員姓名">
-            <button class="btn-add" onclick="addMember()">新增人員</button>
+            <button class="btn-add" onclick="addMember()">➕ 新增人員</button>
             
             <b style="display:block; margin-top:20px;">2. 點擊組別框置入</b>
             <div id="adminGroupBoxes" class="assignment-container"></div>
@@ -126,22 +147,22 @@
         <div class="glass-card">
             <div id="groupAdminList" style="margin-bottom:15px;"></div>
             <input type="text" id="newGroupName" placeholder="新組別名稱">
-            <button class="btn-add" style="background:var(--dark-grey);" onclick="addGroup()">新增組別</button>
+            <button class="btn-add" style="background:var(--dark-grey);" onclick="addGroup()">➕ 新增組別</button>
         </div>
 
         <h2>🛠️ 任務設定</h2>
         <div class="glass-card">
             <div id="taskAdminList" style="margin-bottom:15px;"></div>
             <input type="text" id="newTaskName" placeholder="任務名稱">
-            <input type="number" id="newTaskPts" placeholder="分值">
-            <button class="btn-add" style="background:var(--gold);" onclick="addTask()">新增任務</button>
+            <input type="number" id="newTaskPts" placeholder="任務分值">
+            <button class="btn-add" style="background:var(--gold);" onclick="addTask()">➕ 新增任務</button>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="show(1, this)">📊 戰報</div>
         <div class="nav-item" onclick="show(2, this)">🔥 積分</div>
-        <div class="nav-item" onclick="show(3, this)">⚙️ 黑箱作業</div>
+        <div class="nav-item" onclick="show(3, this)">⚙️ 後台</div>
     </div>
 
     <script>
@@ -182,16 +203,16 @@
                 const inGroup = members.filter(m => m.group_name === g.name);
                 return `
                 <div class="group-box" onclick="dropToGroup('${g.name}')">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; align-items:center;">
                         <span>${g.name} (${inGroup.length}人)</span>
-                        <button class="btn-del" onclick="clearGroup('${g.name}'); event.stopPropagation();" style="color:red; border:none; background:none; font-size:11px;">清空</button>
+                        <button class="btn-del" onclick="clearGroup('${g.name}'); event.stopPropagation();" style="color:red; border:none; background:none; font-size:11px; cursor:pointer;">清空</button>
                     </div>
                     <div style="margin-top:5px;">${inGroup.map(m => `<span class="in-group-tag">${m.name} <span onclick="updateMemberGroup(${m.id}, '未分配'); event.stopPropagation();" style="color:red; cursor:pointer;">×</span></span>`).join('')}</div>
                 </div>`;
             }).join('');
 
-            document.getElementById('groupAdminList').innerHTML = groups.map(g => `<div class="list-item"><span>${g.name}</span><button onclick="deleteData('groups', ${g.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
-            document.getElementById('taskAdminList').innerHTML = tasks.map(t => `<div class="list-item"><span>${t.name} (${t.pts}分)</span><button onclick="deleteData('tasks', ${t.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
+            document.getElementById('groupAdminList').innerHTML = groups.map(g => `<div class="list-item"><span>${g.name}</span><button onclick="deleteData('groups', ${g.id})" style="color:red; border:none; background:none; cursor:pointer;">刪除</button></div>`).join('');
+            document.getElementById('taskAdminList').innerHTML = tasks.map(t => `<div class="list-item"><span>${t.name} (${t.pts}分)</span><button onclick="deleteData('tasks', ${t.id})" style="color:red; border:none; background:none; cursor:pointer;">刪除</button></div>`).join('');
         }
 
         function renderLeaderboard() {
