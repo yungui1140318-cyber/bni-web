@@ -18,23 +18,12 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 修正後的英雄榜樣式 */
         .hero-banner { background: linear-gradient(135deg, var(--bni-red), var(--bni-dark-red)); border-radius: 15px; padding: 20px; text-align: center; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.2); margin-top: 20px; }
         .top3-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 160px; margin-top: 10px; }
         .rank-card { background: white; color: var(--text-dark); padding: 10px; border-radius: 12px; width: 95px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; }
-        
-        /* 皇冠核心修正：置中定位 */
         .rank-1 { height: 120px; border: 3px solid var(--gold); z-index: 2; }
         .rank-2, .rank-3 { height: 95px; opacity: 0.95; }
-        .crown { 
-            position: absolute; 
-            top: -35px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            font-size: 40px; 
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            z-index: 10;
-        }
+        .crown { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); font-size: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); z-index: 10; }
 
         h2 { border-left: 6px solid var(--bni-red); padding-left: 12px; margin: 25px 0 15px 0; font-size: 18px; color: var(--bni-dark-red); font-weight: 800; }
         .glass-card { background: var(--glass-white); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
@@ -44,7 +33,6 @@
         .bar-fill { height: 100%; background: var(--pure-black) !important; transition: width 1s; }
         .bar-num { width: 45px; font-size: 13px; text-align: right; font-weight: 700; color: var(--pure-black); }
 
-        /* 方案三積分頁 */
         .group-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; }
         .filter-btn { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 14px; }
         .filter-btn.active { background: var(--bni-red); color: white; border-color: var(--bni-red); }
@@ -55,12 +43,12 @@
         .task-btn { background: var(--bni-red); border: none; border-radius: 12px; padding: 20px 10px; color: white; cursor: pointer; text-align: center; }
         .task-btn span { color: var(--gold); font-size: 18px; font-weight: 900; display: block; }
 
-        /* 後台分配樣式 */
         .unassigned-pool { border: 2px dashed #ccc; padding: 10px; border-radius: 10px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; margin-bottom: 10px; }
+        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; margin-bottom: 10px; position: relative;}
         .tag { padding: 6px 12px; background: white; border: 1px solid #eee; border-radius: 5px; font-size: 14px; cursor: pointer; }
         .tag.active { background: var(--gold); color: white; border-color: var(--gold); }
         .in-group-tag { padding: 4px 8px; background: #eee; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
 
         #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; }
         .confirm-box { background: white; width:90%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
@@ -123,7 +111,7 @@
             <button class="btn-add" style="background:var(--bni-red); margin-top:10px;" onclick="resetScores()">🧹 積分歸零</button>
         </div>
 
-        <h2>👥 快速分配組別</h2>
+        <h2>👥 快速分配組別 (點人再點組)</h2>
         <div class="glass-card">
             <b>1. 未分配人員 (點選姓名)</b>
             <div class="unassigned-pool" id="poolList"></div>
@@ -133,12 +121,27 @@
             <b style="display:block; margin-top:20px;">2. 點擊組別框置入</b>
             <div id="adminGroupBoxes" class="assignment-container"></div>
         </div>
+
+        <h2>🚩 組別設定</h2>
+        <div class="glass-card">
+            <div id="groupAdminList" style="margin-bottom:15px;"></div>
+            <input type="text" id="newGroupName" placeholder="新組別名稱">
+            <button class="btn-add" style="background:var(--dark-grey);" onclick="addGroup()">新增組別</button>
+        </div>
+
+        <h2>🛠️ 任務設定</h2>
+        <div class="glass-card">
+            <div id="taskAdminList" style="margin-bottom:15px;"></div>
+            <input type="text" id="newTaskName" placeholder="任務名稱">
+            <input type="number" id="newTaskPts" placeholder="分值">
+            <button class="btn-add" style="background:var(--gold);" onclick="addTask()">新增任務</button>
+        </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="show(1, this)">📊 戰報</div>
         <div class="nav-item" onclick="show(2, this)">🔥 積分</div>
-        <div class="nav-item" onclick="show(3, this)">⚙️ 後台</div>
+        <div class="nav-item" onclick="show(3, this)">⚙️ 黑箱作業</div>
     </div>
 
     <script>
@@ -181,19 +184,20 @@
                 <div class="group-box" onclick="dropToGroup('${g.name}')">
                     <div style="display:flex; justify-content:space-between; font-weight:bold;">
                         <span>${g.name} (${inGroup.length}人)</span>
-                        <button class="btn-del" onclick="clearGroup('${g.name}'); event.stopPropagation();" style="color:red; border:none; background:none; font-size:11px;">全清</button>
+                        <button class="btn-del" onclick="clearGroup('${g.name}'); event.stopPropagation();" style="color:red; border:none; background:none; font-size:11px;">清空</button>
                     </div>
                     <div style="margin-top:5px;">${inGroup.map(m => `<span class="in-group-tag">${m.name} <span onclick="updateMemberGroup(${m.id}, '未分配'); event.stopPropagation();" style="color:red; cursor:pointer;">×</span></span>`).join('')}</div>
                 </div>`;
             }).join('');
+
+            document.getElementById('groupAdminList').innerHTML = groups.map(g => `<div class="list-item"><span>${g.name}</span><button onclick="deleteData('groups', ${g.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
+            document.getElementById('taskAdminList').innerHTML = tasks.map(t => `<div class="list-item"><span>${t.name} (${t.pts}分)</span><button onclick="deleteData('tasks', ${t.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
         }
 
         function renderLeaderboard() {
             const memMap = {}; members.forEach(m => memMap[m.name] = 0);
             scoreLogs.forEach(log => { if(memMap[log.member_name] !== undefined) memMap[log.member_name] += log.pts; });
             const sortedMem = Object.entries(memMap).map(([name, total]) => ({name, total})).sort((a,b)=>b.total-a.total);
-            
-            // 英雄榜渲染修正：皇冠固定在 rank-1 上方
             const winners = [sortedMem[1]||{name:'-',total:0}, sortedMem[0]||{name:'-',total:0}, sortedMem[2]||{name:'-',total:0}];
             document.getElementById('top3Content').innerHTML = winners.map((m, i) => `
                 <div class="rank-card ${i===1?'rank-1':'rank-2'}">
@@ -217,7 +221,6 @@
             }).join('');
         }
 
-        // --- 核心邏輯 ---
         function selectGroup(gName) {
             selectedGroupName = gName; selectedMemberName = "";
             const groupMembers = members.filter(m => m.group_name === gName);
@@ -250,7 +253,6 @@
         function closeLogin() { document.getElementById('loginOverlay').style.display = 'none'; }
         function closeConfirm() { document.getElementById('confirmOverlay').style.display = 'none'; }
         
-        // --- 管理功能 ---
         async function updateSeason() { const s = document.getElementById('seasonStart').value, e = document.getElementById('seasonEnd').value; await supabaseClient.from('settings').upsert([{ key: 'start', value: s }, { key: 'end', value: e }]); fetchData(); }
         async function addMember() { const n = document.getElementById('newMemName').value; if(n) { await supabaseClient.from('members').insert([{ name: n, group_name: '未分配' }]); document.getElementById('newMemName').value = ''; fetchData(); } }
         async function updateMemberGroup(id, g) { await supabaseClient.from('members').update({ group_name: g }).eq('id', id); fetchData(); }
