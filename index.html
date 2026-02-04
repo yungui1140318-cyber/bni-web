@@ -22,7 +22,6 @@
             background-size: cover; background-attachment: fixed; color: var(--text-dark);
         }
         
-        /* 導覽列 */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bni-red); display: flex; border-top: 3px solid var(--gold); z-index: 1000; }
         .nav-item { flex: 1; padding: 15px 0; text-align: center; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; }
         .nav-item.active { color: white; font-weight: bold; background: rgba(0,0,0,0.15); }
@@ -46,9 +45,9 @@
         .bar-name { width: 80px; font-size: 13px; font-weight: 800; }
         .bar-track { flex: 1; background: rgba(0,0,0,0.05); height: 14px; border-radius: 7px; overflow: hidden; margin: 0 10px; }
         .bar-fill { height: 100%; background: var(--pure-black); transition: width 1s; }
-        .bar-num { width: 45px; font-size: 13px; text-align: right; font-weight: 700; }
+        .bar-num { width: 45px; font-size: 13px; text-align: right; font-weight: 700; color: var(--pure-black); }
 
-        /* 積分頁：分組切換樣式 */
+        /* 積分頁樣式 */
         .group-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
         .filter-btn { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; white-space: nowrap; font-size: 14px; cursor: pointer; }
         .filter-btn.active { background: var(--bni-red); color: white; border-color: var(--bni-red); font-weight: bold; }
@@ -61,23 +60,41 @@
         .task-btn { background: var(--bni-red); border: none; border-radius: 12px; padding: 20px 10px; text-align: center; color: white; cursor: pointer; }
         .task-btn span { color: var(--gold); font-size: 18px; font-weight: 900; display: block; }
 
-        /* 防呆彈窗 */
-        #confirmOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:4000; padding:20px; box-sizing:border-box; }
+        /* 確認與登入彈窗 */
+        #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; padding:20px; box-sizing:border-box; }
         .confirm-box { background: white; width:100%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
         .confirm-head { background: var(--bni-red); color:white; padding:15px; font-weight:bold; }
         .confirm-body { padding:25px 20px; font-size:18px; line-height:1.6; }
         .confirm-foot { display:flex; border-top:1px solid #eee; }
         .confirm-btn { flex:1; padding:15px; border:none; background:none; font-size:16px; cursor:pointer; }
 
-        /* 其他 */
-        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        .btn-add { background: var(--bni-red); color: white; font-weight: bold; border: none; padding: 12px; border-radius: 8px; width: 100%; }
+        /* 其他管理樣式 */
+        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size:16px; }
+        .btn-add { background: var(--bni-red); color: white; font-weight: bold; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; margin-top:5px; }
+        .list-item { display: flex; flex-direction: column; border-bottom: 1px solid #eee; padding: 10px 0; gap: 5px; }
+        .list-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .small-select { width: 120px; padding: 5px; margin: 0; font-size: 14px; }
+        .btn-del { background: #fee; color: var(--bni-red); border: 1px solid #fcc; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bni-red); color: white; padding: 10px 25px; border-radius: 30px; display: none; z-index: 5000; }
     </style>
 </head>
 <body>
 
     <div id="toast">同步中...</div>
+
+    <div id="loginOverlay">
+        <div class="confirm-box">
+            <div class="confirm-head">🔒 幹部後台管理</div>
+            <div class="confirm-body">
+                <p style="font-size:14px; margin-bottom:10px;">請輸入管理密碼</p>
+                <input type="password" id="adminPwd" style="text-align:center;">
+            </div>
+            <div class="confirm-foot">
+                <button class="confirm-btn" onclick="closeLogin()">取消</button>
+                <button class="confirm-btn" style="color:var(--bni-red); font-weight:bold;" onclick="checkLogin()">登入</button>
+            </div>
+        </div>
+    </div>
 
     <div id="confirmOverlay">
         <div class="confirm-box">
@@ -106,32 +123,54 @@
         <div style="height: 10px;"></div>
         <h2>第一步：選擇組別</h2>
         <div class="group-filter" id="groupFilterList"></div>
-
         <h2>第二步：選擇會員</h2>
-        <div class="member-grid" id="filteredMemberList">
-            <div style="grid-column: 1/-1; color:#999; text-align:center; padding:20px;">請先選擇上方組別</div>
-        </div>
-
+        <div class="member-grid" id="filteredMemberList"><div style="grid-column: 1/-1; color:#999; text-align:center; padding:20px;">請先選擇上方組別</div></div>
         <h2 id="taskStepTitle">第三步：點擊加分</h2>
         <div class="task-grid" id="activeTaskList"></div>
     </div>
 
     <div id="sec3" class="section">
         <div style="height: 20px;"></div>
-        <h2>⚙️ 管理系統</h2>
-        <div class="glass-card">
+        <h2>⚙️ 後台管理系統</h2>
+        
+        <div class="glass-card" style="border: 2px solid var(--gold);">
             <b>📊 數據管理</b>
-            <button class="btn-add" style="background:#444; margin-top:10px;" onclick="exportCSV()">📥 匯出積分明細</button>
+            <button class="btn-add" style="background:#444;" onclick="exportCSV()">📥 匯出積分明細 (CSV)</button>
+            <button class="btn-add" style="background:var(--bni-red);" onclick="resetScores()">🧹 賽期結束：積分歸零</button>
         </div>
+
         <div class="glass-card">
-            <b>👥 會員分配</b>
-            <div id="adminMemberLayout"></div>
+            <b>📅 賽期設定</b>
+            <div style="display:flex; gap:10px;"><input type="date" id="seasonStart"><input type="date" id="seasonEnd"></div>
+            <button class="btn-add" style="background:var(--dark-grey);" onclick="updateSeason()">儲存賽期</button>
+        </div>
+
+        <div class="glass-card">
+            <b>👥 人員管理 (建立後再選組別)</b>
+            <div id="memberListDisplay" style="max-height:200px; overflow-y:auto; margin:10px 0; border:1px solid #eee; padding:5px;"></div>
+            <input type="text" id="newMemName" placeholder="輸入會員姓名">
+            <button class="btn-add" onclick="addMember()">快速新增人員</button>
+        </div>
+
+        <div class="glass-card">
+            <b>🚩 組別管理</b>
+            <div id="groupListDisplay" style="margin:10px 0;"></div>
+            <input type="text" id="newGroupName" placeholder="新組別名稱">
+            <button class="btn-add" style="background:var(--gold);" onclick="addGroup()">新增組別</button>
+        </div>
+
+        <div class="glass-card">
+            <b>🛠️ 任務設定</b>
+            <div id="taskListDisplay" style="margin:10px 0;"></div>
+            <input type="text" id="newTaskName" placeholder="任務名稱">
+            <input type="number" id="newTaskPts" placeholder="分值">
+            <button class="btn-add" style="background:var(--dark-grey);" onclick="addTask()">新增任務</button>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="show(1, this)">📊 戰報</div>
-        <div class="nav-item" onclick="show(2, this)">🔥 任務積分</div>
+        <div class="nav-item" onclick="show(2, this)">🔥 積分</div>
         <div class="nav-item" onclick="show(3, this)">⚙️ 後台</div>
     </div>
 
@@ -140,9 +179,10 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZWtrZGpoeHhobGpqaG5nYXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDg1NjgsImV4cCI6MjA4NTcyNDU2OH0.eOXn_NFXxfDnuymXeAfuyPGzg4efcPu5l6RXwE4ca18';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const ADMIN_PWD = 'yungui666'; // <--- 後台管理密碼
+        let isAuthorized = false;
         let groups = [], members = [], tasks = [], scoreLogs = [], settings = [];
-        let selectedGroupName = "";
-        let selectedMemberName = "";
+        let selectedGroupName = "", selectedMemberName = "";
 
         async function fetchData() {
             showToast('同步中...');
@@ -151,36 +191,37 @@
             const { data: t } = await supabaseClient.from('tasks').select('*').order('id');
             const { data: s } = await supabaseClient.from('score_logs').select('*');
             const { data: set } = await supabaseClient.from('settings').select('*');
-            
             groups = g || []; members = m || []; tasks = t || []; scoreLogs = s || []; settings = set || [];
-            renderAll();
-            hideToast();
+            
+            const start = settings.find(x => x.key === 'start')?.value || '';
+            const end = settings.find(x => x.key === 'end')?.value || '';
+            document.getElementById('seasonDisplay').innerText = `賽期：${start} ~ ${end}`;
+            document.getElementById('seasonStart').value = start;
+            document.getElementById('seasonEnd').value = end;
+            
+            renderAll(); hideToast();
         }
 
         function renderAll() {
-            // 戰報渲染 (略，同前版本)
             renderLeaderboard();
-            
-            // 積分頁：組別過濾器
             const filterHtml = groups.map(g => `<div class="filter-btn ${selectedGroupName === g.name ? 'active' : ''}" onclick="selectGroup('${g.name}')">${g.name}</div>`).join('');
             document.getElementById('groupFilterList').innerHTML = filterHtml;
-
-            // 積分頁：任務列表
-            document.getElementById('activeTaskList').innerHTML = tasks.map(t => `
-                <div class="task-btn" onclick="prepareAddPts('${t.name}', ${t.pts})">
-                    <b>${t.name}</b><span>+${t.pts}</span>
+            document.getElementById('activeTaskList').innerHTML = tasks.map(t => `<div class="task-btn" onclick="prepareAddPts('${t.name}', ${t.pts})"><b>${t.name}</b><span>+${t.pts}</span></div>`).join('');
+            
+            // 後台名單渲染
+            document.getElementById('memberListDisplay').innerHTML = members.map(m => `
+                <div class="list-item">
+                    <div class="list-row"><b>${m.name}</b><button class="btn-del" onclick="deleteData('members', ${m.id})">刪除</button></div>
+                    <select class="small-select" onchange="updateMemberGroup(${m.id}, this.value)">
+                        <option value="未分配" ${m.group_name==='未分配'?'selected':''}>未分配</option>
+                        ${groups.map(g => `<option value="${g.name}" ${m.group_name===g.name?'selected':''}>${g.name}</option>`).join('')}
+                    </select>
                 </div>`).join('');
-
-            // 後台簡易管理
-            document.getElementById('adminMemberLayout').innerHTML = members.map(m => `
-                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
-                    <span>${m.name} (${m.group_name})</span>
-                    <button onclick="deleteData('members', ${m.id})" style="color:red; border:none; background:none;">刪除</button>
-                </div>`).join('');
+            document.getElementById('groupListDisplay').innerHTML = groups.map(g => `<div class="list-item"><div class="list-row"><span>${g.name}</span><button class="btn-del" onclick="deleteData('groups', ${g.id})">刪除</button></div></div>`).join('');
+            document.getElementById('taskListDisplay').innerHTML = tasks.map(t => `<div class="list-item"><div class="list-row"><span>${t.name} (${t.pts}分)</span><button class="btn-del" onclick="deleteData('tasks', ${t.id})">刪除</button></div></div>`).join('');
         }
 
         function renderLeaderboard() {
-            // 個人排行榜
             const memMap = {}; members.forEach(m => memMap[m.name] = 0);
             scoreLogs.forEach(log => { if(memMap[log.member_name] !== undefined) memMap[log.member_name] += log.pts; });
             const sortedMem = Object.entries(memMap).map(([name, total]) => ({name, total})).sort((a,b)=>b.total-a.total);
@@ -191,85 +232,85 @@
                     <div style="color:var(--bni-red);font-weight:900;font-size:18px;">${m.total}</div>
                 </div>`).join('');
 
-            // 總分與指標對抗
             const groupMap = {}; groups.forEach(g => groupMap[g.name] = 0);
             members.forEach(m => { if(groupMap[m.group_name] !== undefined) { scoreLogs.filter(l => l.member_name === m.name).forEach(l => groupMap[m.group_name] += l.pts); } });
             const maxG = Math.max(...Object.values(groupMap), 1);
-            document.getElementById('groupTotalChart').innerHTML = groups.map(g => `
-                <div class="bar-row"><div class="bar-name">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${(groupMap[g.name]/maxG)*100}%"></div></div><div class="bar-num">${groupMap[g.name]}</div></div>`).join('');
+            document.getElementById('groupTotalChart').innerHTML = groups.map(g => `<div class="bar-row"><div class="bar-name">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${(groupMap[g.name]/maxG)*100}%"></div></div><div class="bar-num">${groupMap[g.name]}</div></div>`).join('');
 
             document.getElementById('taskCharts').innerHTML = tasks.map(task => {
                 const gScores = {}; groups.forEach(g => {
                     gScores[g.name] = 0;
-                    members.filter(m => m.group_name === g.name).forEach(m => {
-                        scoreLogs.filter(l => l.member_name === m.name && l.task_name === task.name).forEach(l => gScores[g.name] += l.pts);
-                    });
+                    members.filter(m => m.group_name === g.name).forEach(m => { scoreLogs.filter(l => l.member_name === m.name && l.task_name === task.name).forEach(l => gScores[g.name] += l.pts); });
                 });
                 const maxV = Math.max(...Object.values(gScores), 1);
                 return `<h2>📉 ${task.name} 指標對抗</h2><div class="glass-card">${groups.map(g => `<div class="bar-row"><div class="bar-name">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${(gScores[g.name]/maxV)*100}%"></div></div><div class="bar-num">${gScores[g.name]}</div></div>`).join('')}</div>`;
             }).join('');
         }
 
-        // --- 方案三專用邏輯 ---
+        // --- 管理員登入邏輯 ---
+        function show(n, el) {
+            if(n === 3 && !isAuthorized) { document.getElementById('loginOverlay').style.display = 'flex'; return; }
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec'+n).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function checkLogin() {
+            if(document.getElementById('adminPwd').value === ADMIN_PWD) { isAuthorized = true; closeLogin(); show(3, document.querySelectorAll('.nav-item')[2]); }
+            else alert('密碼錯誤！');
+        }
+        function closeLogin() { document.getElementById('loginOverlay').style.display = 'none'; }
 
+        // --- 方案三邏輯 ---
         function selectGroup(gName) {
-            selectedGroupName = gName;
-            selectedMemberName = ""; // 切換組別時清除已選成員
+            selectedGroupName = gName; selectedMemberName = "";
             const groupMembers = members.filter(m => m.group_name === gName);
-            document.getElementById('filteredMemberList').innerHTML = groupMembers.map(m => `
-                <div class="mem-btn" id="mem-${m.name}" onclick="selectMember('${m.name}')">${m.name}</div>
-            `).join('');
+            document.getElementById('filteredMemberList').innerHTML = groupMembers.map(m => `<div class="mem-btn" id="mem-${m.name}" onclick="selectMember('${m.name}')">${m.name}</div>`).join('');
             renderAll();
         }
-
         function selectMember(mName) {
             selectedMemberName = mName;
             document.querySelectorAll('.mem-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('mem-'+mName).classList.add('selected');
             document.getElementById('taskStepTitle').innerHTML = `第三步：為 <span style="color:var(--bni-red)">${mName}</span> 加分`;
         }
-
         function prepareAddPts(taskName, pts) {
-            if(!selectedMemberName) return alert("請先選擇要錄入的會員名稱！");
-            
-            document.getElementById('confirmText').innerHTML = `您即將幫 <b>【${selectedMemberName}】</b><br>錄入 <b>${taskName} (+${pts}分)</b>`;
+            if(!selectedMemberName) return alert("請先選擇會員！");
+            document.getElementById('confirmText').innerHTML = `您正在幫 <b>【${selectedMemberName}】</b><br>錄入 <b>${taskName} (+${pts}分)</b>`;
             document.getElementById('confirmOverlay').style.display = 'flex';
-            
-            // 設定確定按鈕的行為
             document.getElementById('finalSubmitBtn').onclick = async function() {
-                closeConfirm();
-                showToast('正在寫入資料...');
-                await supabaseClient.from('score_logs').insert([{ 
-                    member_name: selectedMemberName, 
-                    task_name: taskName, 
-                    pts: pts 
-                }]);
-                fetchData();
-                showToast('✅ 錄入成功！');
+                closeConfirm(); showToast('寫入中...');
+                await supabaseClient.from('score_logs').insert([{ member_name: selectedMemberName, task_name: taskName, pts: pts }]);
+                fetchData(); showToast('✅ 錄入成功');
             };
         }
-
         function closeConfirm() { document.getElementById('confirmOverlay').style.display = 'none'; }
 
-        // --- 基礎功能 ---
-        function show(n, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sec'+n).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+        // --- 管理功能 ---
+        async function updateSeason() {
+            const s = document.getElementById('seasonStart').value;
+            const e = document.getElementById('seasonEnd').value;
+            await supabaseClient.from('settings').upsert([{ key: 'start', value: s }, { key: 'end', value: e }]);
+            fetchData();
         }
+        async function addMember() {
+            const n = document.getElementById('newMemName').value;
+            if(n) { await supabaseClient.from('members').insert([{ name: n, group_name: '未分配' }]); document.getElementById('newMemName').value = ''; fetchData(); }
+        }
+        async function updateMemberGroup(id, g) { await supabaseClient.from('members').update({ group_name: g }).eq('id', id); fetchData(); }
+        async function addGroup() { const n = document.getElementById('newGroupName').value; if(n) { await supabaseClient.from('groups').insert([{ name: n }]); document.getElementById('newGroupName').value=''; fetchData(); } }
+        async function addTask() { const n = document.getElementById('newTaskName').value, p = document.getElementById('newTaskPts').value; if(n&&p) { await supabaseClient.from('tasks').insert([{ name: n, pts: parseInt(p) }]); fetchData(); } }
+        async function deleteData(table, id) { if(confirm('確定刪除？')) { await supabaseClient.from(table).delete().eq('id', id); fetchData(); } }
+        async function resetScores() { if(confirm('確定歸零？')) { const p = prompt('輸入「雲貴」：'); if(p==='雲貴') { await supabaseClient.from('score_logs').delete().neq('id', 0); fetchData(); } } }
+        function exportCSV() {
+            let csv = "\ufeff會員,任務,分數,時間\n";
+            scoreLogs.forEach(l => { csv += `${l.member_name},${l.task_name},${l.pts},${l.created_at}\n`; });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+            link.download = `雲貴積分_${new Date().toLocaleDateString()}.csv`; link.click();
+        }
+
         function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; }
         function hideToast() { setTimeout(()=> document.getElementById('toast').style.display = 'none', 1000); }
-        async function deleteData(table, id) { if(confirm('確定刪除？')) { await supabaseClient.from(table).delete().eq('id', id); fetchData(); } }
-        function exportCSV() {
-            let csvContent = "\ufeff會員,任務,分數,時間\n";
-            scoreLogs.forEach(log => { csvContent += `${log.member_name},${log.task_name},${log.pts},${log.created_at}\n`; });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", `雲貴積分_${new Date().toLocaleDateString()}.csv`);
-            link.click();
-        }
 
         fetchData();
     </script>
