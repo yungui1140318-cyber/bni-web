@@ -45,18 +45,7 @@
         .task-btn { background: var(--bni-red); border: none; border-radius: 12px; padding: 20px 10px; color: white; cursor: pointer; text-align: center; }
         .task-btn span { color: var(--gold); font-size: 18px; font-weight: 900; display: block; }
 
-        /* 後台分配樣式 */
-        .unassigned-pool { border: 2px dashed #ccc; padding: 10px; border-radius: 10px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; margin-bottom: 10px; position: relative;}
-        .tag { padding: 6px 12px; background: white; border: 1px solid #eee; border-radius: 5px; font-size: 14px; cursor: pointer; }
-        .tag.active { background: var(--gold); color: white; border-color: var(--gold); }
-        .in-group-tag { padding: 4px 8px; background: #eee; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
-
-        /* 彈窗樣式 */
-        #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; }
-        .confirm-box { background: white; width:90%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
-        
-        /* 修正後的按鈕樣式，確保文字清晰 */
+        /* 統一按鈕樣式：BNI紅 */
         .btn-add { 
             background: var(--bni-red); 
             color: white !important; 
@@ -70,8 +59,20 @@
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-top: 10px;
+            font-size: 16px;
         }
-        .btn-add:active { transform: translateY(2px); box-shadow: none; }
+        .btn-add:active { transform: translateY(2px); box-shadow: none; background: var(--bni-dark-red); }
+
+        /* 後台分配樣式 */
+        .unassigned-pool { border: 2px dashed #ccc; padding: 10px; border-radius: 10px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; margin-bottom: 10px; position: relative;}
+        .tag { padding: 6px 12px; background: white; border: 1px solid #eee; border-radius: 5px; font-size: 14px; cursor: pointer; }
+        .tag.active { background: var(--gold); color: white; border-color: var(--gold); }
+        .in-group-tag { padding: 4px 8px; background: #eee; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
+
+        /* 彈窗樣式 */
+        #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; }
+        .confirm-box { background: white; width:90%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
         
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
@@ -128,8 +129,8 @@
         <div class="glass-card">
             <button class="btn-add" style="background:#444;" onclick="exportCSV()">📥 匯出積分報表 (CSV)</button>
             <div style="display:flex; gap:10px;"><input type="date" id="seasonStart"><input type="date" id="seasonEnd"></div>
-            <button class="btn-add" style="background:var(--gold);" onclick="updateSeason()">💾 儲存賽期設定</button>
-            <button class="btn-add" style="background:var(--bni-red);" onclick="resetScores()">🧹 賽事結算：積分歸零</button>
+            <button class="btn-add" onclick="updateSeason()">💾 儲存賽期設定</button>
+            <button class="btn-add" onclick="resetScores()">🧹 賽事結算：積分歸零</button>
         </div>
 
         <h2>👥 快速分配組別 (點人再點組)</h2>
@@ -137,7 +138,7 @@
             <b>1. 未分配人員 (點選姓名)</b>
             <div class="unassigned-pool" id="poolList"></div>
             <input type="text" id="newMemName" placeholder="新會員姓名">
-            <button class="btn-add" onclick="addMember()">➕ 新增人員</button>
+            <button class="btn-add" onclick="addMember()">➕ 新增此人員</button>
             
             <b style="display:block; margin-top:20px;">2. 點擊組別框置入</b>
             <div id="adminGroupBoxes" class="assignment-container"></div>
@@ -147,7 +148,7 @@
         <div class="glass-card">
             <div id="groupAdminList" style="margin-bottom:15px;"></div>
             <input type="text" id="newGroupName" placeholder="新組別名稱">
-            <button class="btn-add" style="background:var(--dark-grey);" onclick="addGroup()">➕ 新增組別</button>
+            <button class="btn-add" onclick="addGroup()">➕ 新增此組別</button>
         </div>
 
         <h2>🛠️ 任務設定</h2>
@@ -155,7 +156,7 @@
             <div id="taskAdminList" style="margin-bottom:15px;"></div>
             <input type="text" id="newTaskName" placeholder="任務名稱">
             <input type="number" id="newTaskPts" placeholder="任務分值">
-            <button class="btn-add" style="background:var(--gold);" onclick="addTask()">➕ 新增任務</button>
+            <button class="btn-add" onclick="addTask()">➕ 新增此任務</button>
         </div>
     </div>
 
