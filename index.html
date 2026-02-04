@@ -65,11 +65,24 @@
         .btn-del { background: #fee; color: var(--bni-red); border: 1px solid #fcc; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bni-red); color: white; padding: 10px 25px; border-radius: 30px; display: none; z-index: 2000; }
+        
+        /* 登入蓋板 */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 3000; display: none; flex-direction: column; justify-content: center; align-items: center; color: white; }
     </style>
 </head>
 <body>
 
     <div id="toast">同步中...</div>
+
+    <div id="loginOverlay">
+        <h3 style="color: var(--gold);">🔒 幹部後台管理</h3>
+        <p style="font-size: 14px;">請輸入管理密碼以繼續</p>
+        <input type="password" id="adminPwd" style="width: 250px; text-align: center;" placeholder="請輸入密碼">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-add" style="width: 120px; background: var(--dark-grey);" onclick="closeLogin()">取消</button>
+            <button class="btn-add" style="width: 120px;" onclick="checkLogin()">登入</button>
+        </div>
+    </div>
 
     <div id="sec1" class="section active">
         <div style="height: 20px;"></div>
@@ -80,7 +93,6 @@
         </div>
         <h2>🚩 分組總積分排行</h2>
         <div id="groupTotalChart" class="glass-card"></div>
-        
         <div id="taskCharts"></div>
     </div>
 
@@ -97,43 +109,15 @@
     <div id="sec3" class="section">
         <div style="height: 20px;"></div>
         <h2>⚙️ 後台管理系統</h2>
-
         <div class="glass-card" style="border: 2px solid var(--gold);">
             <b>📊 賽期結算工具</b>
             <button class="btn-add" style="background:var(--dark-grey); margin-bottom: 10px;" onclick="exportCSV()">📥 匯出積分明細 (CSV)</button>
             <button class="btn-add" style="background:var(--bni-red);" onclick="resetScores()">🧹 賽期結束：積分歸零</button>
         </div>
-
-        <div class="glass-card">
-            <b>📅 賽期設定</b>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <input type="date" id="seasonStart">
-                <input type="date" id="seasonEnd">
-            </div>
-            <button class="btn-add" style="background:var(--dark-grey);" onclick="updateSeason()">儲存賽期</button>
-        </div>
-        
-        <div class="glass-card">
-            <b>👥 人員管理</b>
-            <div id="memberListDisplay" style="max-height:200px; overflow-y:auto; margin:10px 0; border:1px solid #eee; padding:5px;"></div>
-            <input type="text" id="newMemName" placeholder="輸入會員姓名">
-            <button class="btn-add" onclick="addMember()">快速新增人員</button>
-        </div>
-
-        <div class="glass-card">
-            <b>🚩 組別管理</b>
-            <div id="groupListDisplay" style="margin:10px 0;"></div>
-            <input type="text" id="newGroupName" placeholder="新組別名稱">
-            <button class="btn-add" style="background:var(--gold);" onclick="addGroup()">新增組別</button>
-        </div>
-
-        <div class="glass-card">
-            <b>🛠️ 任務設定</b>
-            <div id="taskListDisplay" style="margin:10px 0;"></div>
-            <input type="text" id="newTaskName" placeholder="任務名稱">
-            <input type="number" id="newTaskPts" placeholder="分值">
-            <button class="btn-add" style="background:var(--dark-grey);" onclick="addTask()">新增任務</button>
-        </div>
+        <div class="glass-card"><b>📅 賽期設定</b><div style="display:flex; gap:10px;"><input type="date" id="seasonStart"><input type="date" id="seasonEnd"></div><button class="btn-add" style="background:var(--dark-grey);" onclick="updateSeason()">儲存賽期</button></div>
+        <div class="glass-card"><b>👥 人員管理</b><div id="memberListDisplay" style="max-height:200px; overflow-y:auto; margin:10px 0; border:1px solid #eee; padding:5px;"></div><input type="text" id="newMemName" placeholder="輸入會員姓名"><button class="btn-add" onclick="addMember()">快速新增人員</button></div>
+        <div class="glass-card"><b>🚩 組別管理</b><div id="groupListDisplay" style="margin:10px 0;"></div><input type="text" id="newGroupName" placeholder="新組別名稱"><button class="btn-add" style="background:var(--gold);" onclick="addGroup()">新增組別</button></div>
+        <div class="glass-card"><b>🛠️ 任務設定</b><div id="taskListDisplay" style="margin:10px 0;"></div><input type="text" id="newTaskName" placeholder="任務名稱"><input type="number" id="newTaskPts" placeholder="分值"><button class="btn-add" style="background:var(--dark-grey);" onclick="addTask()">新增任務</button></div>
     </div>
 
     <div class="bottom-nav">
@@ -146,8 +130,36 @@
         const SUPABASE_URL = 'https://syekkdjhxxhljjhngaxb.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5ZWtrZGpoeHhobGpqaG5nYXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDg1NjgsImV4cCI6MjA4NTcyNDU2OH0.eOXn_NFXxfDnuymXeAfuyPGzg4efcPu5l6RXwE4ca18';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        const ADMIN_PWD = 'yungui666'; // <--- 您可以在此修改後台管理密碼
+        let isAuthorized = false;
 
         let groups = [], members = [], tasks = [], scoreLogs = [], settings = [];
+
+        function show(n, el) {
+            if(n === 3 && !isAuthorized) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+                return;
+            }
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec'+n).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function checkLogin() {
+            const val = document.getElementById('adminPwd').value;
+            if(val === ADMIN_PWD) {
+                isAuthorized = true;
+                document.getElementById('loginOverlay').style.display = 'none';
+                show(3, document.querySelectorAll('.nav-item')[2]);
+                showToast('密碼正確，進入後台');
+            } else {
+                alert('密碼錯誤！');
+            }
+        }
+
+        function closeLogin() { document.getElementById('loginOverlay').style.display = 'none'; }
 
         async function fetchData() {
             showToast('同步中...');
@@ -156,43 +168,29 @@
             const { data: t } = await supabaseClient.from('tasks').select('*').order('id');
             const { data: s } = await supabaseClient.from('score_logs').select('*');
             const { data: set } = await supabaseClient.from('settings').select('*');
-
-            groups = g || [];
-            members = m || [];
-            tasks = t || [];
-            scoreLogs = s || [];
-            settings = set || [];
-            
+            groups = g || []; members = m || []; tasks = t || []; scoreLogs = s || []; settings = set || [];
             const start = settings.find(x => x.key === 'start')?.value || '';
             const end = settings.find(x => x.key === 'end')?.value || '';
             document.getElementById('seasonDisplay').innerText = `賽期：${start} ~ ${end}`;
             document.getElementById('seasonStart').value = start;
             document.getElementById('seasonEnd').value = end;
-            
-            renderAll();
-            hideToast();
+            renderAll(); hideToast();
         }
 
         function exportCSV() {
-            if (scoreLogs.length === 0) return alert('沒有積分數據');
             let csvContent = "\ufeff會員,任務,分數,時間\n";
-            scoreLogs.forEach(log => {
-                csvContent += `${log.member_name},${log.task_name},${log.pts},${log.created_at}\n`;
-            });
+            scoreLogs.forEach(log => { csvContent += `${log.member_name},${log.task_name},${log.pts},${log.created_at}\n`; });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.setAttribute("href", URL.createObjectURL(blob));
             link.setAttribute("download", `雲貴積分_${new Date().toLocaleDateString()}.csv`);
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
         }
 
         async function resetScores() {
             if (!confirm('確定歸零？')) return;
-            const pwd = prompt('請輸入「雲貴」確認：');
+            const pwd = prompt('請再次輸入分會名稱「雲貴」確認：');
             if (pwd !== '雲貴') return;
-            showToast('清理中...');
             await supabaseClient.from('score_logs').delete().neq('id', 0);
             fetchData();
         }
@@ -208,29 +206,25 @@
             const name = document.getElementById('newMemName').value;
             if(!name) return;
             await supabaseClient.from('members').insert([{ name, group_name: '未分配' }]);
-            document.getElementById('newMemName').value = '';
-            fetchData();
+            document.getElementById('newMemName').value = ''; fetchData();
         }
 
         async function updateMemberGroup(id, groupName) {
-            await supabaseClient.from('members').update({ group_name: groupName }).eq('id', id);
-            fetchData();
+            await supabaseClient.from('members').update({ group_name: groupName }).eq('id', id); fetchData();
         }
 
         async function addPts(taskName, pts) {
             const memName = document.getElementById('userSelect').value;
             if(!memName) return alert('請先選擇會員');
             showToast('紀錄中...');
-            await supabaseClient.from('score_logs').insert([{ member_name: memName, task_name: taskName, pts: pts }]);
-            fetchData();
+            await supabaseClient.from('score_logs').insert([{ member_name: memName, task_name: taskName, pts: pts }]); fetchData();
         }
 
         async function addGroup() {
             const name = document.getElementById('newGroupName').value;
             if(!name) return;
             await supabaseClient.from('groups').insert([{ name }]);
-            document.getElementById('newGroupName').value = '';
-            fetchData();
+            document.getElementById('newGroupName').value = ''; fetchData();
         }
 
         async function addTask() {
@@ -239,20 +233,16 @@
             if(!name || !pts) return;
             await supabaseClient.from('tasks').insert([{ name, pts: parseInt(pts) }]);
             document.getElementById('newTaskName').value = '';
-            document.getElementById('newTaskPts').value = '';
-            fetchData();
+            document.getElementById('newTaskPts').value = ''; fetchData();
         }
 
         async function deleteData(table, id) {
             if(!confirm('確定刪除？')) return;
-            await supabaseClient.from(table).delete().eq('id', id);
-            fetchData();
+            await supabaseClient.from(table).delete().eq('id', id); fetchData();
         }
 
         function renderAll() {
-            // 個人排行榜
-            const memMap = {};
-            members.forEach(m => memMap[m.name] = 0);
+            const memMap = {}; members.forEach(m => memMap[m.name] = 0);
             scoreLogs.forEach(log => { if(memMap[log.member_name] !== undefined) memMap[log.member_name] += log.pts; });
             const sortedMem = Object.entries(memMap).map(([name, total]) => ({name, total})).sort((a,b)=>b.total-a.total);
             const winners = [sortedMem[1]||{name:'-',total:0}, sortedMem[0]||{name:'-',total:0}, sortedMem[2]||{name:'-',total:0}];
@@ -262,19 +252,15 @@
                     <div style="color:var(--bni-red);font-weight:900;font-size:18px;">${m.total}</div>
                 </div>`).join('');
 
-            // 組別排行榜 (總分)
-            const groupMap = {};
-            groups.forEach(g => groupMap[g.name] = 0);
+            const groupMap = {}; groups.forEach(g => groupMap[g.name] = 0);
             members.forEach(m => { if(groupMap[m.group_name] !== undefined) { scoreLogs.filter(l => l.member_name === m.name).forEach(l => groupMap[m.group_name] += l.pts); } });
             const maxG = Math.max(...Object.values(groupMap), 1);
             document.getElementById('groupTotalChart').innerHTML = groups.map(g => `
                 <div class="bar-row">
-                    <div class="bar-name">${g.name}</div>
-                    <div class="bar-track"><div class="bar-fill" style="width:${(groupMap[g.name]/maxG)*100}%"></div></div>
+                    <div class="bar-name">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${(groupMap[g.name]/maxG)*100}%"></div></div>
                     <div class="bar-num">${groupMap[g.name]}</div>
                 </div>`).join('');
 
-            // --- 新增：各項任務指標的分組對抗圖 ---
             document.getElementById('taskCharts').innerHTML = tasks.map(task => {
                 const gScores = {};
                 groups.forEach(g => {
@@ -284,27 +270,13 @@
                     });
                 });
                 const maxV = Math.max(...Object.values(gScores), 1);
-                return `
-                <h2>📉 ${task.name} 指標對抗</h2>
-                <div class="glass-card">
-                    ${groups.map(g => `
-                    <div class="bar-row">
-                        <div class="bar-name">${g.name}</div>
-                        <div class="bar-track"><div class="bar-fill" style="width:${(gScores[g.name]/maxV)*100}%"></div></div>
-                        <div class="bar-num">${gScores[g.name]}</div>
-                    </div>`).join('')}
-                </div>`;
+                return `<h2>📉 ${task.name} 指標對抗</h2><div class="glass-card">${groups.map(g => `<div class="bar-row"><div class="bar-name">${g.name}</div><div class="bar-track"><div class="bar-fill" style="width:${(gScores[g.name]/maxV)*100}%"></div></div><div class="bar-num">${gScores[g.name]}</div></div>`).join('')}</div>`;
             }).join('');
 
-            // 後台名單
             document.getElementById('memberListDisplay').innerHTML = members.map(m => `
                 <div class="list-item">
                     <div class="list-row"><b style="font-size:16px;">${m.name}</b><button class="btn-del" onclick="deleteData('members', ${m.id})">刪除</button></div>
-                    <div class="list-row"><span style="font-size:12px;">組別：</span>
-                    <select class="small-select" onchange="updateMemberGroup(${m.id}, this.value)">
-                        <option value="未分配" ${m.group_name==='未分配'?'selected':''}>未分配</option>
-                        ${groups.map(g => `<option value="${g.name}" ${m.group_name===g.name?'selected':''}>${g.name}</option>`).join('')}
-                    </select></div>
+                    <div class="list-row"><span style="font-size:12px;">組別：</span><select class="small-select" onchange="updateMemberGroup(${m.id}, this.value)"><option value="未分配" ${m.group_name==='未分配'?'selected':''}>未分配</option>${groups.map(g => `<option value="${g.name}" ${m.group_name===g.name?'selected':''}>${g.name}</option>`).join('')}</select></div>
                 </div>`).join('');
 
             document.getElementById('groupListDisplay').innerHTML = groups.map(g => `<div class="list-item"><div class="list-row"><span>${g.name}</span><button class="btn-del" onclick="deleteData('groups', ${g.id})">刪除</button></div></div>`).join('');
@@ -314,12 +286,6 @@
             document.getElementById('activeTaskList').innerHTML = tasks.map(t => `<div class="task-btn" onclick="addPts('${t.name}', ${t.pts})"><b>${t.name}</b><span>+${t.pts}</span></div>`).join('');
         }
 
-        function show(n, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById('sec'+n).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-        }
         function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; }
         function hideToast() { setTimeout(()=> document.getElementById('toast').style.display = 'none', 1000); }
 
