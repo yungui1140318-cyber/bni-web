@@ -19,36 +19,37 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         h2 { border-left: 6px solid var(--bni-red); padding-left: 12px; margin: 20px 0 10px 0; font-size: 18px; color: var(--bni-dark-red); }
 
-        /* 統計與積分樣式 (維持先前版本) */
-        .hero-banner { background: linear-gradient(135deg, var(--bni-red), var(--bni-dark-red)); border-radius: 15px; padding: 20px; text-align: center; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-        .rank-card { background: white; color: var(--text-dark); padding: 10px; border-radius: 12px; width: 95px; text-align: center; }
+        .hero-banner { background: linear-gradient(135deg, var(--bni-red), var(--bni-dark-red)); border-radius: 15px; padding: 20px; text-align: center; color: white; }
+        .rank-card { background: white; color: var(--text-dark); padding: 10px; border-radius: 12px; width: 95px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .bar-track { flex: 1; background: rgba(0,0,0,0.05); height: 14px; border-radius: 7px; overflow: hidden; margin: 0 10px; }
         .bar-fill { height: 100%; background: var(--pure-black); transition: width 1s; }
         
-        /* 方案三積分頁 */
         .group-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; }
         .filter-btn { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; white-space: nowrap; cursor: pointer; }
         .filter-btn.active { background: var(--bni-red); color: white; }
         .member-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .mem-btn { background: white; border: 2px solid transparent; padding: 12px 5px; border-radius: 10px; text-align: center; cursor: pointer; }
+        .mem-btn { background: white; border: 2px solid transparent; padding: 12px 5px; border-radius: 10px; text-align: center; cursor: pointer; font-size: 14px; }
         .mem-btn.selected { border-color: var(--bni-red); background: #fff5f5; color: var(--bni-red); font-weight: bold; }
         .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .task-btn { background: var(--bni-red); border: none; border-radius: 12px; padding: 20px 10px; color: white; cursor: pointer; }
 
-        /* 後台優化：快速進組樣式 */
         .glass-card { background: var(--glass-white); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
         .assignment-container { display: flex; flex-direction: column; gap: 15px; }
         .unassigned-pool { border: 2px dashed #ccc; padding: 10px; border-radius: 10px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; cursor: pointer; }
-        .group-box:hover { border-color: var(--bni-red); background: #fffefe; }
+        .group-box { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background: #f9f9f9; position: relative; }
         .tag { padding: 6px 12px; background: white; border: 1px solid #eee; border-radius: 5px; font-size: 14px; cursor: pointer; }
         .tag.active { background: var(--gold); color: white; border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
         .in-group-tag { padding: 4px 8px; background: #eee; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
+
+        .clear-btn { background: #fee; color: var(--bni-red); border: 1px solid #fcc; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .clear-btn:hover { background: var(--bni-red); color: white; }
 
         #confirmOverlay, #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:4000; }
         .confirm-box { background: white; width:90%; max-width:320px; border-radius:20px; overflow:hidden; text-align:center; }
         .btn-add { background: var(--bni-red); color: white; font-weight: bold; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; }
         input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -103,6 +104,7 @@
             <button class="btn-add" style="background:#444; margin-bottom:10px;" onclick="exportCSV()">📥 匯出 CSV</button>
             <div style="display:flex; gap:10px;"><input type="date" id="seasonStart"><input type="date" id="seasonEnd"></div>
             <button class="btn-add" style="background:var(--gold);" onclick="updateSeason()">儲存賽期</button>
+            <button class="btn-add" style="background:var(--bni-red); margin-top:10px; font-size:12px;" onclick="resetScores()">🧹 賽期結束：積分歸零</button>
         </div>
 
         <h2>👥 快速分配組別 (點人再點組)</h2>
@@ -112,14 +114,20 @@
             <input type="text" id="newMemName" placeholder="輸入姓名按新增">
             <button class="btn-add" onclick="addMember()">新增人員</button>
             
-            <b style="display:block; margin-top:20px;">2. 點擊下方組別框「置入」人員</b>
-            <div id="adminGroupBoxes" class="assignment-container"></div>
+            <b style="display:block; margin-top:20px;">2. 點擊組別框置入 (或點紅色按鈕清空)</b>
+            <div id="adminGroupBoxes" class="assignment-container" style="margin-top:10px;"></div>
         </div>
 
         <h2>🛠️ 基礎設定</h2>
         <div class="glass-card">
-            <b>新增組別：</b><input type="text" id="newGroupName"><button class="btn-add" onclick="addGroup()">新增</button>
-            <b style="display:block; margin-top:15px;">新增任務：</b><input type="text" id="newTaskName" placeholder="名稱"><input type="number" id="newTaskPts" placeholder="分值"><button class="btn-add" onclick="addTask()">新增</button>
+            <b>組別清單：</b>
+            <div id="groupAdminList" style="margin-bottom:15px;"></div>
+            <input type="text" id="newGroupName" placeholder="新組別名稱"><button class="btn-add" onclick="addGroup()">新增組別</button>
+        </div>
+        <div class="glass-card">
+            <b>任務清單：</b>
+            <div id="taskAdminList" style="margin-bottom:15px;"></div>
+            <input type="text" id="newTaskName" placeholder="名稱"><input type="number" id="newTaskPts" placeholder="分值"><button class="btn-add" onclick="addTask()">新增任務</button>
         </div>
     </div>
 
@@ -161,7 +169,7 @@
             document.getElementById('groupFilterList').innerHTML = groups.map(g => `<div class="filter-btn ${selectedGroupName === g.name ? 'active' : ''}" onclick="selectGroup('${g.name}')">${g.name}</div>`).join('');
             document.getElementById('activeTaskList').innerHTML = tasks.map(t => `<div class="task-btn" onclick="prepareAddPts('${t.name}', ${t.pts})"><b>${t.name}</b><span>+${t.pts}</span></div>`).join('');
 
-            // 後台快速進組優化
+            // 後台分配區
             const unassigned = members.filter(m => !m.group_name || m.group_name === '未分配');
             document.getElementById('poolList').innerHTML = unassigned.map(m => `<div class="tag ${movingMemberId === m.id ? 'active' : ''}" onclick="pickMember(${m.id})">${m.name}</div>`).join('');
             
@@ -169,20 +177,32 @@
                 const inGroup = members.filter(m => m.group_name === g.name);
                 return `
                 <div class="group-box" onclick="dropToGroup('${g.name}')">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>${g.name} (${inGroup.length}人)</span><button onclick="deleteData('groups', ${g.id}); event.stopPropagation();" style="color:red; border:none; background:none; font-size:10px;">刪除組別</button></div>
-                    <div style="margin-top:5px;">${inGroup.map(m => `<span class="in-group-tag">${m.name} <span onclick="updateMemberGroup(${m.id}, '未分配'); event.stopPropagation();" style="color:red; margin-left:4px;">×</span></span>`).join('')}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b style="font-size:14px;">${g.name} (${inGroup.length}人)</b>
+                        <button class="clear-btn" onclick="clearGroup('${g.name}'); event.stopPropagation();">全組清空</button>
+                    </div>
+                    <div style="margin-top:8px;">${inGroup.map(m => `<span class="in-group-tag">${m.name} <span onclick="updateMemberGroup(${m.id}, '未分配'); event.stopPropagation();" style="color:red; cursor:pointer;">×</span></span>`).join('')}</div>
                 </div>`;
             }).join('');
+
+            // 後台清單
+            document.getElementById('groupAdminList').innerHTML = groups.map(g => `<div class="list-item"><span>${g.name}</span><button onclick="deleteData('groups', ${g.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
+            document.getElementById('taskAdminList').innerHTML = tasks.map(t => `<div class="list-item"><span>${t.name} (${t.pts}分)</span><button onclick="deleteData('tasks', ${t.id})" style="color:red; border:none; background:none;">刪除</button></div>`).join('');
         }
 
-        // --- 核心優化邏輯：點人再點組 ---
-        function pickMember(id) {
-            movingMemberId = (movingMemberId === id) ? null : id;
-            renderAll();
+        // --- 優化功能：全組清空 ---
+        async function clearGroup(gName) {
+            if(!confirm(`確定要將「${gName}」的所有成員移至未分配池嗎？`)) return;
+            showToast('清空組別中...');
+            const { error } = await supabaseClient.from('members').update({ group_name: '未分配' }).eq('group_name', gName);
+            if(error) alert('清空失敗：' + error.message);
+            await fetchData();
         }
+
+        function pickMember(id) { movingMemberId = (movingMemberId === id) ? null : id; renderAll(); }
 
         async function dropToGroup(gName) {
-            if(!movingMemberId) return alert('請先點選上方的「未分配人員」標籤！');
+            if(!movingMemberId) return;
             showToast('搬移中...');
             await supabaseClient.from('members').update({ group_name: gName }).eq('id', movingMemberId);
             movingMemberId = null;
@@ -216,7 +236,7 @@
             }).join('');
         }
 
-        // --- 其它功能 ---
+        // --- 核心邏輯 ---
         function selectGroup(gName) {
             selectedGroupName = gName; selectedMemberName = "";
             const groupMembers = members.filter(m => m.group_name === gName);
@@ -253,8 +273,9 @@
         async function updateMemberGroup(id, g) { await supabaseClient.from('members').update({ group_name: g }).eq('id', id); fetchData(); }
         async function addGroup() { const n = document.getElementById('newGroupName').value; if(n) { await supabaseClient.from('groups').insert([{ name: n }]); document.getElementById('newGroupName').value=''; fetchData(); } }
         async function addTask() { const n = document.getElementById('newTaskName').value, p = document.getElementById('newTaskPts').value; if(n&&p) { await supabaseClient.from('tasks').insert([{ name: n, pts: parseInt(p) }]); fetchData(); } }
-        async function deleteData(table, id) { if(confirm('確定刪除？')) { await supabaseClient.from(table).delete().eq('id', id); fetchData(); } }
-        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=> t.style.display = 'none', 1000); }
+        async function deleteData(table, id) { if(confirm('確定刪除？這會影響連動資料。')) { await supabaseClient.from(table).delete().eq('id', id); fetchData(); } }
+        async function resetScores() { if(confirm('⚠️ 警告：這將清空所有人的積分紀錄！')) { const p = prompt('請輸入「雲貴」確認：'); if(p==='雲貴') { await supabaseClient.from('score_logs').delete().neq('id', 0); fetchData(); } } }
+        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=> t.style.display = 'none', 1200); }
         function exportCSV() {
             let csv = "\ufeff會員,任務,分數,時間\n";
             scoreLogs.forEach(l => { csv += `${l.member_name},${l.task_name},${l.pts},${l.created_at}\n`; });
